@@ -77,22 +77,24 @@ class Pothole {
   update() {
     if (this.image) {
       this.draw()
-
       this.position.y += this.velocity.y
     }
   }
 }
 
 const car = new Car()
-const pothole = new Pothole()
+const pothole = []
+setInterval(() => {
+  pothole.push(new Pothole())
+}, 1200)
 
 const animate = () => {
   requestAnimationFrame(animate)
-
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+  pothole.forEach((hole) => {
+    hole.update()
+  })
   car.update()
-  pothole.update()
 }
 
 animate()
@@ -145,3 +147,5 @@ addEventListener('keyup', (e) => {
       break
   }
 })
+
+const checkCollision = () => {}
