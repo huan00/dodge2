@@ -1,11 +1,12 @@
 const canvas = document.querySelector('#myCanvas')
 const ctx = canvas.getContext('2d')
 
-canvas.width = 300
+canvas.width = innerWidth * 0.3
 canvas.height = innerHeight - 50
-let health = 1000
-let gameOver = false
+let health = canvas.width
+let gameover = false
 
+//creating the car class
 class Car {
   constructor() {
     this.velocity = {
@@ -47,6 +48,7 @@ class Car {
   }
 }
 
+//creating the pothole class
 class Pothole {
   constructor() {
     this.velocity = {
@@ -78,6 +80,7 @@ class Pothole {
   }
 }
 
+//checking for collission
 const checkCollision = () => {
   pothole.forEach((hole) => {
     if (
@@ -90,12 +93,33 @@ const checkCollision = () => {
       health--
       console.log(health)
       if (health <= 0) {
-        gameOver = true
+        gameover = true
       }
     }
   })
 }
 
+//creating the healthbar
+class HealthBar {
+  constructor(health) {
+    this.health = health
+    this.width = canvas.width
+  }
+
+  draw() {
+    ctx.fillStyle = 'green'
+    ctx.fillRect(0, 0, health, 10)
+  }
+
+  update() {
+    this.draw()
+    this.width = health
+  }
+}
+
+const healthBar = new HealthBar(health)
+
+/*************************** */
 const car = new Car()
 const pothole = []
 setInterval(() => {
@@ -103,12 +127,15 @@ setInterval(() => {
 }, 1000)
 
 const animate = () => {
-  if (gameOver) {
-    alert('gameover')
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  if (gameover) {
+    alert(gameover)
     return
   }
+
   requestAnimationFrame(animate)
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  healthBar.update()
   pothole.forEach((hole) => {
     hole.update()
   })
