@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d')
 
 canvas.width = 300
 canvas.height = innerHeight - 50
+let health = 1000
+let gameOver = false
 
 class Car {
   constructor() {
@@ -14,8 +16,8 @@ class Car {
     image.src = './image/redcar.png'
     image.onload = () => {
       this.image = image
-      this.width = image.width * 0.05
-      this.height = image.height * 0.05
+      this.width = image.width * 0.04
+      this.height = image.height * 0.04
       this.position = {
         x: canvas.width / 2 - this.width / 2,
         y: canvas.height - 100
@@ -53,11 +55,11 @@ class Pothole {
     }
 
     const image = new Image()
-    image.src = './image/pothole.png'
+    image.src = './image/potholev2.png'
     image.onload = () => {
       this.image = image
-      this.width = image.width * 0.15
-      this.height = image.height * 0.15
+      this.width = image.width * 0.07
+      this.height = image.height * 0.1
       this.position = {
         x: Math.floor(Math.random() * canvas.width) - 50,
         y: -50
@@ -66,13 +68,7 @@ class Pothole {
   }
 
   draw() {
-    ctx.drawImage(
-      this.image,
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    )
+    ctx.drawImage(this.image, this.position.x, this.position.y, 40, this.height)
   }
   update() {
     if (this.image) {
@@ -82,18 +78,41 @@ class Pothole {
   }
 }
 
+const checkCollision = () => {
+  pothole.forEach((hole) => {
+    if (
+      car.position.x < hole.position.x + hole.width &&
+      car.position.x + car.width > hole.position.x &&
+      car.position.y < hole.position.y + hole.height &&
+      car.height + car.position.y > hole.position.y
+    ) {
+      console.log('hitted')
+      health--
+      console.log(health)
+      if (health <= 0) {
+        gameOver = true
+      }
+    }
+  })
+}
+
 const car = new Car()
 const pothole = []
 setInterval(() => {
   pothole.push(new Pothole())
-}, 1200)
+}, 1000)
 
 const animate = () => {
+  if (gameOver) {
+    alert('gameover')
+    return
+  }
   requestAnimationFrame(animate)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   pothole.forEach((hole) => {
     hole.update()
   })
+  checkCollision()
   car.update()
 }
 
@@ -147,5 +166,3 @@ addEventListener('keyup', (e) => {
       break
   }
 })
-
-const checkCollision = () => {}
