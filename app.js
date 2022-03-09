@@ -1,10 +1,16 @@
 const canvas = document.querySelector('#myCanvas')
 const ctx = canvas.getContext('2d')
+const NYC = document.querySelector('#NYC')
+const texas = document.querySelector('#texas')
+const sanDiego = document.querySelector('#sanDiego')
+const startBtn = document.querySelector('#start')
+const modal = document.querySelector('#modal')
 
 canvas.width = innerWidth * 0.3
 canvas.height = innerHeight - 50
 let health = canvas.width
 let gameover = false
+let speed = 1000
 
 //creating the car class
 class Car {
@@ -80,25 +86,6 @@ class Pothole {
   }
 }
 
-//checking for collission
-const checkCollision = () => {
-  pothole.forEach((hole) => {
-    if (
-      car.position.x < hole.position.x + hole.width &&
-      car.position.x + car.width > hole.position.x &&
-      car.position.y < hole.position.y + hole.height &&
-      car.height + car.position.y > hole.position.y
-    ) {
-      console.log('hitted')
-      health--
-      console.log(health)
-      if (health <= 0) {
-        gameover = true
-      }
-    }
-  })
-}
-
 //creating the healthbar
 class HealthBar {
   constructor(health) {
@@ -117,24 +104,80 @@ class HealthBar {
   }
 }
 
-const healthBar = new HealthBar(health)
+class keepScore {
+  constructor() {
+    this.score = 0
+  }
+
+  draw() {
+    ctx.fillStyle = 'black'
+    ctx.font = '20px Arial'
+    ctx.fillText(`Score: ${this.score}`, canvas.width - 120, 35)
+  }
+
+  update() {
+    this.draw()
+    this.score++
+  }
+}
+
+//checking for collission
+const checkCollision = () => {
+  pothole.forEach((hole) => {
+    if (
+      (car.position.x < hole.position.x + hole.width &&
+        car.position.x + car.width > hole.position.x &&
+        car.position.y < hole.position.y + hole.height &&
+        car.height + car.position.y > hole.position.y) ||
+      car.position.x < 0 ||
+      car.position.x > canvas.width
+    ) {
+      console.log('hitted')
+      health--
+      console.log(health)
+      if (health <= 0) {
+        gameover = true
+      }
+    }
+  })
+}
+
+const gameOver = () => {
+  if (gameover) {
+    ctx.fillStyle = 'black'
+    ctx.font = '30px Arial'
+    ctx.textAlign = 'center'
+    ctx.fillText('Your Tires Popped!!', canvas.width / 2, canvas.height / 2)
+    ctx.fillText(
+      `Your score: ${score.score}`,
+      canvas.width / 2,
+      canvas.height / 2 + 40
+    )
+  }
+}
+
+const gameSpeed = (enter) => {
+  setInterval(() => {
+    pothole.push(new Pothole())
+  }, speed)
+}
 
 /*************************** */
+/*create class items */
 const car = new Car()
+const healthBar = new HealthBar(health)
 const pothole = []
-setInterval(() => {
-  pothole.push(new Pothole())
-}, 1000)
+const score = new keepScore()
+// gameSpeed(speed)
 
 const animate = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   if (gameover) {
-    alert(gameover)
+    gameOver()
     return
   }
-
   requestAnimationFrame(animate)
-
+  score.update()
   healthBar.update()
   pothole.forEach((hole) => {
     hole.update()
@@ -142,8 +185,8 @@ const animate = () => {
   checkCollision()
   car.update()
 }
-
-animate()
+// gameSpeed(speed)
+// animate()
 
 addEventListener('keydown', (e) => {
   console.log(e.key)
@@ -151,23 +194,25 @@ addEventListener('keydown', (e) => {
     case 'ArrowUp':
       console.log('up')
       if (car.position.y >= 0) {
-        car.velocity.y = -10
+        car.velocity.y = -5
       }
       break
     case 'ArrowDown':
       if (car.position.y >= canvas.height - 100) return
       console.log('down')
-      car.velocity.y = 10
+      car.velocity.y = 5
       break
     case 'ArrowLeft':
       console.log('Left')
-      if (car.position.x <= 0) return
-      car.velocity.x = -10
+      if (car.position.x > 0) {
+        car.velocity.x = -5
+      }
       break
     case 'ArrowRight':
       console.log('Right')
-      if (car.position.x >= canvas.width) return
-      car.velocity.x = 10
+      if (car.position.x + car.width < canvas.width) {
+        car.velocity.x = 5
+      }
       break
   }
 })
@@ -192,4 +237,10 @@ addEventListener('keyup', (e) => {
       car.velocity.x = 0
       break
   }
+})
+
+startBtn.addEventListener('click', () => {
+  gameSpeed(speed)
+  animate()
+  modal.style.display = 'none'
 })
